@@ -59,10 +59,19 @@ $DSMIcon=[System.Drawing.Icon]::FromHandle($iconHandle)
 
 #region form helper functions
 # Fetch the user account & properties in AD
- 
+ Function MakeNewForm {
+	$Form1.Close()
+	$Form1.Dispose()
+	#$global:reload=[int]1 	
+	GenerateForm
+}
+	
+	
  function Get-DomainUser {
- PARAM([parameter(Position=1,Mandatory=$true)] [string]$samAccountName)
- 	#Write-Host "Function Get-DomainUser looked up user: $samAccountName" -ForegroundColor yellow
+	PARAM([parameter(Position=1,Mandatory=$true)] [string]$samAccountName)
+ 	
+	try{
+	#Write-Host "Function Get-DomainUser looked up user: $samAccountName" -ForegroundColor yellow
     $dom = [System.DirectoryServices.ActiveDirectory.Domain]::GetCurrentDomain()  
 	$root = [ADSI]"LDAP://$($dom.Name)"
 	
@@ -82,10 +91,10 @@ $DSMIcon=[System.Drawing.Icon]::FromHandle($iconHandle)
 	$Search.PropertiesToLoad.Add("facsimileTelephoneNumber") | Out-Null
 	$searcherResults = $Search.FindOne()
 	$ADResults = $searcherResults | select -Expand Properties | select @{n='samaccountname';e={$_.samaccountname}}, @{n='displayname';e={$_.displayname}},@{n='telephonenumber';e={$_.telephonenumber}}, @{n='title';e={$_.title}},@{n='street';e={$_.street}}, @{n='postofficebox';e={$_.postofficebox}},@{n='homephone';e={$_.homephone}}, @{n='mobile';e={$_.mobile}},@{n='pager';e={$_.pager}}, @{n='facsimileTelephoneNumber';e={$_.facsimileTelephoneNumber}},@{n='adspath';e={$_.adspath}}
-	write-host @"
-Function Get-DomainUser fetched these properties:
-$ADResults
-"@ -ForegroundColor Green
+	#write-host @"
+#Function Get-DomainUser fetched these properties:
+#$ADResults
+#"@ -ForegroundColor Green
 	
 	# Fill the form
 	$samaccountBox.Text = (($ADResults.samaccountname) | Out-String).Trim()
@@ -99,13 +108,23 @@ $ADResults
 	$pagerBox.Text = ($ADResults.pager | Out-String).Trim()
 	$faxBox.Text = ($ADResults.facsimileTelephoneNumber | Out-String).Trim()
 	$global:adspath = ($ADResults.adspath | Out-String).Trim()
-	
+		}
+	catch{
+		$ErrorMessage = $_.Exception.Message
+    	$FailedItem = ($_.Exception.GetType().FullName)
+		
+		[void][System.Windows.Forms.MessageBox]::Show($ErrorMessage,$FailedItem,0,16)
+		break
+		MakeNewForm
+	}
 
 }
 
  function Set-DomainUser {
  #write the values back
     PARAM($attribute,$value)
+		
+	try{	
 	$dom = [System.DirectoryServices.ActiveDirectory.Domain]::GetCurrentDomain()  
 	$root = [ADSI]"LDAP://$($dom.Name)"
 	 
@@ -127,6 +146,16 @@ $ADResults
 	}
 	#$dirObject.SetInfo()
 	$dirObject.CommitChanges()
+		}
+	
+		catch{
+		$ErrorMessage = $_.Exception.Message
+    	$FailedItem = ($_.Exception.GetType().FullName)
+		[void][System.Windows.Forms.MessageBox]::Show($ErrorMessage,$FailedItem,0,16)
+		break
+		MakeNewForm
+
+		}
 }
 
 #endregion form helper functions
@@ -135,6 +164,7 @@ $ADResults
 
 $loadButton_OnClick= 
 {
+		
 Get-DomainUser -SamAccountName $samname
 
 }
@@ -167,6 +197,7 @@ Set-DomainUser -attribute $_.Key -Value $_.Value
 $cancelButton_OnClick= 
 {
 $form1.Close()
+$form1.Dispose()
 }
 
 $OnLoadForm_StateCorrection=
