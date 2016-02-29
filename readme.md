@@ -4,6 +4,7 @@ _The tool allows you to change some of your own properties in Active Directory (
 
 **minimal requirements**
 - Windows PowerShell version 2
+- Domain joined workstation
 - Read/Write access to the AD attributes (Without special adjustments you are allowed to change some of your AD properties)
 
 **If you only want the tool and don't care about what the script does, you will only need:**
