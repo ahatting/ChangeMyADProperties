@@ -58,15 +58,7 @@ $DSMIcon=[System.Drawing.Icon]::FromHandle($iconHandle)
 
 
 #region form helper functions
-# Fetch the user account & properties in AD
- Function MakeNewForm {
-	$Form1.Close()
-	$Form1.Dispose()
-	#$global:reload=[int]1 	
-	GenerateForm
-}
-	
-	
+# Fetch the user account & properties in AD	
  function Get-DomainUser {
 	PARAM([parameter(Position=1,Mandatory=$true)] [string]$samAccountName)
  	
@@ -115,7 +107,7 @@ $DSMIcon=[System.Drawing.Icon]::FromHandle($iconHandle)
 		
 		[void][System.Windows.Forms.MessageBox]::Show($ErrorMessage,$FailedItem,0,16)
 		break
-		MakeNewForm
+		
 	}
 
 }
@@ -153,7 +145,7 @@ $DSMIcon=[System.Drawing.Icon]::FromHandle($iconHandle)
     	$FailedItem = ($_.Exception.GetType().FullName)
 		[void][System.Windows.Forms.MessageBox]::Show($ErrorMessage,$FailedItem,0,16)
 		break
-		MakeNewForm
+		
 
 		}
 }
