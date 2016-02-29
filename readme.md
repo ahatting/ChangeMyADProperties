@@ -1,4 +1,4 @@
-﻿## ChangeDG
+﻿## ChangeMyADProperties
 
 _The tool allows you to change some of your own properties in Active Directory (if you are allowed to)_
 
